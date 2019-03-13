@@ -8,6 +8,7 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.Shader;
 import android.os.Build;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.util.AttributeSet;
@@ -15,7 +16,7 @@ import android.util.Log;
 import android.view.View;
 
 /**
- * 自己draw view并且用渐变色来渲染，从左到右的渐变
+ * 自己draw view并且用渐变色来渲染，从上到下的渐变
  * Created by fish on 2019/3/13.
  * yuxm_zju@aliyun.com
  */
@@ -30,25 +31,34 @@ public class CustomView extends View {
     private void init(Context context) {
 
         paintOuterText = new Paint();
-        //不要用setcolor冲突的
-//        paintOuterText.setColor(Color.RED);
+        paintOuterText.setColor(Color.RED);
         paintOuterText.setAntiAlias(true);
         paintOuterText.setTextSize(100);
         paintOuterText.setTextAlign(Paint.Align.CENTER);
+//        paintOuterText.setShadowLayer(8,0,-6,Color.BLACK);
 
 
         Log.d("AAA", "width is " + width);
 
 
-        String text = "2019";
+        String text = getText();
 
         Rect rect = new Rect();
         paintOuterText.getTextBounds(text, 0, text.length(), rect);
+        Rect bounds = new Rect();
+        paintOuterText.getTextBounds(getText(), 0, 1, bounds);
+//        LinearGradient mLinearGradient = new LinearGradient(0, 0, width, 0, Color.RED, Color.GREEN, Shader.TileMode.CLAMP);
 
+        // 77 - 150
+        LinearGradient mLinearGradient = new LinearGradient(0, baseY() -bounds.height(), 0, baseY(), Color.RED, Color.GREEN, Shader.TileMode.CLAMP);
 
-        width = paintOuterText.measureText("2019");
-        LinearGradient mLinearGradient = new LinearGradient(0, 0, width, 0, Color.RED, Color.GREEN, Shader.TileMode.CLAMP);
+        width = paintOuterText.measureText(getText());
         paintOuterText.setShader(mLinearGradient);
+    }
+
+    @NonNull
+    private String getText() {
+        return "2019";
     }
 
     float width;
@@ -80,8 +90,13 @@ public class CustomView extends View {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
         //这里的x 居然用的是中间的点
-        canvas.drawText("2019", width/2, 150, paintOuterText);
-        canvas.drawLine(0, 150, width, 150, paintOuterText);
+        //y是基线的点
+        canvas.drawText(getText(), width / 2, baseY(), paintOuterText);
+        canvas.drawLine(0, baseY(), width, baseY(), paintOuterText);
+    }
+
+    private int baseY() {
+        return 150;
     }
 
 }
